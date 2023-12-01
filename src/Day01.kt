@@ -1,19 +1,21 @@
 fun main() {
-    fun part1(input: List<String>) =
-        input.map { it.filter { c -> c.isDigit() } }
-            .map { "${it.first()}${it.last()}" }
-            .sumOf { it.toInt() }
+    fun part1(input: List<String>) = input
+        .map { it.filter { c -> c.isDigit() } }
+        .map { "${it.first()}${it.last()}" }
+        .map { it.toInt() }
+        .sum()
 
     fun part2(input: List<String>): Int {
-        val numbers = arrayOf(
+        val numbers = listOf(
             *Array(10) { it.toString() },
             "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"
         )
+        val valid = numbers.joinToString("|").toRegex()
+        val validReversed = numbers.joinToString("|").reversed().toRegex()
+        fun String.toDigit() = numbers.indexOf(this) % 10
 
-        return input.sumOf { s ->
-            "\\d|${numbers.joinToString("|")}".toRegex().findAll(s)
-                .map { numbers.indexOf(it.value) % 10 }
-                .let { it.first() * 10 + it.last() }
+        return input.sumOf {
+            valid.find(it)!!.value.toDigit() * 10 + validReversed.find(it.reversed())!!.value.reversed().toDigit()
         }
     }
 
