@@ -5,12 +5,23 @@ fun main() {
             .sumOf { it.toInt() }
 
     fun part2(input: List<String>): Int {
-        val numbers = arrayOf("zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine")
-        fun String.toDigit() = numbers.indexOf(this).let { if (it > -1) it else this.toInt() }
+        val numbers = listOf(
+            *(0..9).map { it.toString() }.toTypedArray(),
+            "zero",
+            "one",
+            "two",
+            "three",
+            "four",
+            "five",
+            "six",
+            "seven",
+            "eight",
+            "nine"
+        )
 
         return input.sumOf { s ->
-            "\\d|(${numbers.joinToString(")|(")})".toRegex().findAll(s)
-                .map { it.value.toDigit() }
+            "\\d|${numbers.joinToString("|")}".toRegex().findAll(s)
+                .map { numbers.indexOf(it.value) % 10 }
                 .let { it.first() * 10 + it.last() }
         }
     }
