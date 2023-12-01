@@ -5,18 +5,9 @@ fun main() {
             .sumOf { it.toInt() }
 
     fun part2(input: List<String>): Int {
-        val numbers = listOf(
-            *(0..9).map { it.toString() }.toTypedArray(),
-            "zero",
-            "one",
-            "two",
-            "three",
-            "four",
-            "five",
-            "six",
-            "seven",
-            "eight",
-            "nine"
+        val numbers = arrayOf(
+            *Array(10) { it.toString() },
+            "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"
         )
 
         return input.sumOf { s ->
