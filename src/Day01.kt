@@ -2,8 +2,7 @@ fun main() {
     fun part1(input: List<String>) = input
         .map { it.filter { c -> c.isDigit() } }
         .map { "${it.first()}${it.last()}" }
-        .map { it.toInt() }
-        .sum()
+        .sumOf { it.toInt() }
 
     fun part2(input: List<String>): Int {
         val numbers = listOf(
