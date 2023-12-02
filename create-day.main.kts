@@ -18,12 +18,13 @@ val content = """
             TODO()
         }
 
-        val testInput = readInput("Day%%DAY%%")
+        val testInput = readInput("Day%%DAY%%_test")
         check(part1(testInput) == 1)
+        // check(part2(testInput) == 1)
 
         val input = readInput("Day%%DAY%%")
         part1(input).println()
-        part2(input).println()
+        // part2(input).println()
     }
 """.trimIndent().replace("%%DAY%%", day)
 
