@@ -9,13 +9,14 @@ fun main() {
             *Array(10) { it.toString() },
             "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"
         )
-        val valid = numbers.joinToString("|").toRegex()
-        val validReversed = numbers.joinToString("|").reversed().toRegex()
-        fun String.toDigit() = numbers.indexOf(this) % 10
+        fun String.first() = numbers.joinToString("|").toRegex()
+            .find(this)!!.value
+            .let { n -> numbers.indexOf(n) % 10 }
+        fun String.last() = numbers.joinToString("|").reversed().toRegex()
+            .find(this.reversed())!!.value
+            .let { n -> numbers.indexOf(n.reversed()) % 10 }
 
-        return input.sumOf {
-            valid.find(it)!!.value.toDigit() * 10 + validReversed.find(it.reversed())!!.value.reversed().toDigit()
-        }
+        return input.sumOf { it.first() * 10 + it.last() }
     }
 
     check(part1(readInput("Day01_test")) == 142)
