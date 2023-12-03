@@ -1,85 +1,41 @@
-import kotlin.math.max
-import kotlin.math.min
-
 fun main() {
     data class Cell(val x: Int, val y: Int)
-//    operator fun List<String>.get(cell:Cell) = this[cell.y][cell.x]
-
-    fun part1(input: List<String>): Int {
-        val symbols = input.flatMapIndexed { y, line ->
-            line.withIndex()
-                .filter { (_, c) -> !c.isDigit() && c != '.' }
-                .map { (x, _) -> Cell(x, y) }
-        }.toSet()
-
-        val parts = mutableListOf<Int>()
-        input.forEachIndexed { y, line ->
-            var word = ""
-            line.forEachIndexed { x, c ->
-                if (c.isDigit()) word += c
-                if (word.isNotEmpty() && (x == line.length - 1 || !line[x + 1].isDigit())) {
-                    val above =
-                        if (y == 0) emptyList() else (max(x - word.length, 0) until min(line.length, x + 2)).map {
-                            Cell(
-                                it,
-                                y - 1
-                            )
-                        }
-                    val left = if (x < word.length) emptyList() else listOf(Cell(x - word.length, y))
-                    val right = if (x == line.length - 1) emptyList() else listOf(Cell(x + 1, y))
-                    val bottom = if (y == input.size - 1) emptyList() else (max(x - word.length, 0) until min(
-                        line.length,
-                        x + 2
-                    )).map { Cell(it, y + 1) }
-                    if ((above + left + right + bottom).any { symbols.contains(it) }) {
-                        parts.add(word.toInt())
-                    }
-                    word = ""
-                }
-            }
-        }
-
-        return parts.sum()
+    data class Symbol(val pos: Cell, val value: Char)
+    data class Part(val pos: Cell, val value: Int) {
+        fun adjacentTo(cell: Cell) = cell.x >= pos.x - 1 &&
+                cell.x <= pos.x + value.toString().length &&
+                cell.y >= pos.y - 1 &&
+                cell.y <= pos.y + 1
     }
 
-    fun part2(input: List<String>): Int {
+    fun partsBySymbol(input: List<String>): Map<Symbol, List<Part>> {
         val symbols = input.flatMapIndexed { y, line ->
             line.withIndex()
                 .filter { (_, c) -> !c.isDigit() && c != '.' }
-                .map { (x, _) -> Cell(x, y) }
+                .map { (x, c) -> Symbol(Cell(x, y), c) }
         }.toSet()
 
-        val partsBySymbol = mutableMapOf<Cell, MutableList<Int>>()
-        symbols.forEach { partsBySymbol[it] = mutableListOf<Int>() }
-        input.forEachIndexed { y, line ->
+        return  input.flatMapIndexed { y, line ->
             var word = ""
-            line.forEachIndexed { x, c ->
+            line.flatMapIndexed { x, c ->
                 if (c.isDigit()) word += c
                 if (word.isNotEmpty() && (x == line.length - 1 || !line[x + 1].isDigit())) {
-                    val above =
-                        if (y == 0) emptyList() else (max(x - word.length, 0) until min(line.length, x + 2)).map {
-                            Cell(
-                                it,
-                                y - 1
-                            )
-                        }
-                    val left = if (x < word.length) emptyList() else listOf(Cell(x - word.length, y))
-                    val right = if (x == line.length - 1) emptyList() else listOf(Cell(x + 1, y))
-                    val bottom = if (y == input.size - 1) emptyList() else (max(x - word.length, 0) until min(
-                        line.length,
-                        x + 2
-                    )).map { Cell(it, y + 1) }
-                    (above + left + right + bottom).filter { symbols.contains(it) }
-                        .forEach { symbol -> partsBySymbol[symbol]!!.add(word.toInt()) }
+                    val part = Part(Cell(x - word.length + 1, y), word.toInt())
                     word = ""
+                    symbols.filter { part.adjacentTo(it.pos) }.map { Pair(it, part)}
+                } else {
+                    emptyList()
                 }
             }
-        }
+        }.groupBy({ it.first }, {it.second})
+    }
 
-//        println(partsBySymbol)
+    fun part1(input: List<String>) = partsBySymbol(input).values.flatten().toSet().sumOf { it.value }
 
-        return partsBySymbol.values.filter { it.size > 1 }
-            .sumOf { it.reduce { a, b -> a * b } }
+    fun part2(input: List<String>): Int {
+        return partsBySymbol(input).filter { (symbol, parts) -> symbol.value == '*' && parts.size > 1 }
+            .map { (_, parts) -> parts.fold(1) { acc, part -> acc * part.value } }
+            .sum()
     }
 
     val testInput = readInput("Day03_test")
