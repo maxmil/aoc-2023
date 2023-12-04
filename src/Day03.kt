@@ -1,3 +1,6 @@
+import java.util.function.Predicate
+import kotlin.time.measureTimedValue
+
 fun main() {
     data class Cell(val x: Int, val y: Int)
     data class Symbol(val pos: Cell, val value: Char)
@@ -8,10 +11,10 @@ fun main() {
                 cell.y <= pos.y + 1
     }
 
-    fun partsBySymbol(input: List<String>): Map<Symbol, List<Part>> {
+    fun partsBySymbol(input: List<String>, isSymbol: Predicate<Char>): Map<Symbol, List<Part>> {
         val symbols = input.flatMapIndexed { y, line ->
             line.withIndex()
-                .filter { (_, c) -> !c.isDigit() && c != '.' }
+                .filter { (_, c) -> isSymbol.test(c)}
                 .map { (x, c) -> Symbol(Cell(x, y), c) }
         }.toSet()
 
@@ -30,10 +33,13 @@ fun main() {
         }.groupBy({ it.first }, {it.second})
     }
 
-    fun part1(input: List<String>) = partsBySymbol(input).values.flatten().toSet().sumOf { it.value }
+    fun part1(input: List<String>): Int {
+        return partsBySymbol(input) { !it.isDigit() && it != '.' }.values.flatten().toSet().sumOf { it.value }
+    }
 
     fun part2(input: List<String>): Int {
-        return partsBySymbol(input).filter { (symbol, parts) -> symbol.value == '*' && parts.size > 1 }
+        return partsBySymbol(input) { it == '*' }
+            .filter { (_, parts) -> parts.size > 1 }
             .map { (_, parts) -> parts.fold(1) { acc, part -> acc * part.value } }
             .sum()
     }
@@ -43,6 +49,6 @@ fun main() {
     check(part2(testInput) == 467835)
 
     val input = readInput("Day03")
-    part1(input).println()
-    part2(input).println()
+    measureTimedValue { part1(input) }.also { println("${it.value} in ${it.duration}")}
+    measureTimedValue { part2(input) }.also { println("${it.value} in ${it.duration}")}
 }

@@ -9,6 +9,8 @@ if(args.size != 1) {
 val day = "%02d".format(args[0].toInt())
 
 val content = """
+    import kotlin.time.measureTimedValue
+    
     fun main() {
         fun part1(input: List<String>): Int {
             TODO()
@@ -23,8 +25,8 @@ val content = """
         // check(part2(testInput) == 1)
 
         val input = readInput("Day%%DAY%%")
-        part1(input).println()
-        // part2(input).println()
+        measureTimedValue { part1(input) }.also { println("${'$'}{it.value} in ${'$'}{it.duration}")}
+        // measureTimedValue { part2(input) }.also { println("${'$'}{it.value} in ${'$'}{it.duration}")}
     }
 """.trimIndent().replace("%%DAY%%", day)
 
