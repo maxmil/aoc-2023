@@ -13,8 +13,7 @@ fun main() {
         val largestGroupA = (groupsA.values.maxOfOrNull { it.size } ?: 0) + jokersA
         val largestGroupB = (groupsB.values.maxOfOrNull { it.size } ?: 0) + jokersB
         (largestGroupA - largestGroupB).let { if (it != 0) return it }
-        val cardsWithJoker = cards.indexOf(joker)
-            .let { if (it == -1) cards else listOf(joker) + cards.subList(0, it) + cards.subList(it + 1, cards.size) }
+        val cardsWithJoker = if (joker == null) cards else cards.toMutableList().apply { remove(joker);addFirst(joker) }
         return a.toCharArray().zip(b.toCharArray()).firstOrNull { (c1, c2) -> c1 != c2 }
             ?.let { (c1, c2) -> cardsWithJoker.indexOf(c1) - cardsWithJoker.indexOf(c2) }
             ?: 0
