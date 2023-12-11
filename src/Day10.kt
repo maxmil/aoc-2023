@@ -89,8 +89,9 @@ fun main() {
         val clockwise = isClockwiseLoop(moves)
         val inLoop = mutableSetOf<Cell>()
         moves.windowed(3).forEach { (a, b, c) ->
-            val cells = listOf(b + (b - a).turn(clockwise), (b + (c - b).turn(clockwise)))
-            cells.forEach { inLoop.addAll(inRegion(input, it, (moves + inLoop).toSet())) }
+            listOf(b + (b - a).turn(clockwise), (b + (c - b).turn(clockwise)))
+                .filter { !moves.contains(it) && !inLoop.contains(it) }
+                .forEach { inLoop.addAll(inRegion(input, it, (moves + inLoop).toSet())) }
         }
         return inLoop.size
     }
