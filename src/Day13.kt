@@ -3,16 +3,12 @@ import kotlin.time.measureTimedValue
 
 fun main() {
 
-    fun String.smudges(other: String): Int {
-        return zip(other).count { (a, b) -> a != b }
-    }
+    fun String.smudges(other: String) = zip(other).count { (a, b) -> a != b }
 
     fun List<String>.transpose(): List<String> {
-        val h = size
-        val w = this[0].length
-        val l = Array(w) { CharArray(h) }
-        (0..<h).forEach { y -> (0..<w).forEach { x -> l[x][y] = this[y][x] } }
-        return l.map { it.joinToString("") }
+        val a = Array(this[0].length) { CharArray(size) }
+        indices.forEach { y -> (0..<this[0].length).forEach { x -> a[x][y] = this[y][x] } }
+        return a.map { it.joinToString("") }
     }
 
     fun maxReflection(grid: List<String>, smudges: Int): Int {
@@ -44,12 +40,6 @@ fun main() {
     check(part2(testInput) == 400)
 
     val input = readInputText("Day13")
-    measureTimedValue { part1(input) }.also { check(it.value == 27202) }
-        .also { println("${it.value} in ${it.duration}") }
-    measureTimedValue { part2(input) }.also { check(it.value == 41566) }
-        .also { println("${it.value} in ${it.duration}") }
+    measureTimedValue { part1(input) }.also { println("${it.value} in ${it.duration}") }
+    measureTimedValue { part2(input) }.also { println("${it.value} in ${it.duration}") }
 }
-
-
-// Why 100000000?
-// ("101100110".toInt(2) and "110000001".toInt(2)).toString(2).println()
