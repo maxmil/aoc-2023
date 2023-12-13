@@ -16,15 +16,11 @@ fun main() {
             if (!candidate.contains('.')) {
                 if (rest.isEmpty()) {
                     if (!record.substring(i + size, record.length).contains('#')) found += 1
-                } else {
-                    if (record[i + size] != '#')
-                        found += arrangements(record.substring(i + size + 1, record.length), rest)
+                } else if (record[i + size] != '#') {
+                    found += arrangements(record.substring(i + size + 1, record.length), rest)
                 }
             }
-            if (candidate.startsWith('#')) {
-                cache[key] = found
-                return found
-            }
+            if (candidate.startsWith('#')) break
             i++
         }
         cache[key] = found
