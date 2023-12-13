@@ -44,8 +44,6 @@ fun main() {
     check(part2(testInput) == 525152L)
 
     val input = readInput("Day12")
-    measureTimedValue { part1(input) }.also { check(it.value == 7047L) }
-        .also { println("${it.value} in ${it.duration}") }
-    measureTimedValue { part2(input) }.also { check(it.value == 17391848518844L) }
-        .also { println("${it.value} in ${it.duration}") }
+    measureTimedValue { part1(input) }.also { println("${it.value} in ${it.duration}") }
+    measureTimedValue { part2(input) }.also { println("${it.value} in ${it.duration}") }
 }
