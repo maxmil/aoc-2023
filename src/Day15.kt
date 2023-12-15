@@ -8,7 +8,7 @@ fun main() {
     fun part1(input: String) = input.split(",").sumOf { it.hash() }
 
     fun part2(input: String): Int {
-        val boxes = Array(256) { LinkedHashMap<String, Int>() }
+        val boxes = Array(256) { linkedMapOf<String, Int>() }
         input.split(",").forEach { s ->
             s.split("[=\\-]".toRegex()).let { (label, focalLength) ->
                 boxes[label.hash()].let { lenses ->
