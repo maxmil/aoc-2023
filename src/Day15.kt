@@ -3,29 +3,23 @@ import kotlin.time.measureTimedValue
 
 fun main() {
 
-    data class Lens(val label: String, val focalLength: Int)
-
     fun String.hash() = fold(0) { acc, c -> ((acc + c.code) * 17) % 256 }.toInt()
 
     fun part1(input: String) = input.split(",").sumOf { it.hash() }
 
     fun part2(input: String): Int {
-        val boxes = Array(256) { mutableListOf<Lens>() }
+        val boxes = Array(256) { LinkedHashMap<String, Int>() }
         input.split(",").forEach { s ->
             s.split("[=\\-]".toRegex()).let { (label, focalLength) ->
                 boxes[label.hash()].let { lenses ->
-                    val index = lenses.indexOfFirst { it.label == label }
-                    if (focalLength.isNotEmpty()) {
-                        val lens = Lens(label, focalLength.toInt())
-                        if (index > -1) lenses[index] = lens
-                        else lenses.add(lens)
-                    } else if (index > -1) lenses.removeAt(index)
+                    if (focalLength.isNotEmpty()) lenses[label] = focalLength.toInt()
+                    else lenses.remove(label)
                 }
             }
         }
 
         return boxes.withIndex().sumOf { (boxIndex, lenses) ->
-            lenses.withIndex().sumOf { (lensIndex, pair) -> (boxIndex + 1) * (lensIndex + 1) * pair.focalLength }
+            lenses.values.withIndex().sumOf { (lensIndex, focalLength) -> (boxIndex + 1) * (lensIndex + 1) * focalLength }
         }
     }
 
