@@ -17,99 +17,57 @@ enum class Direction(val value: Point) {
     WEST(Point(-1, 0)),
 }
 
-enum class Axis(val directions: Pair<Direction, Direction>) {
-    VERTICAL(Pair(NORTH, SOUTH)),
-    HORIZONTAL(Pair(EAST, WEST)),
-}
-
 data class Light(val point: Point, val direction: Direction) {
-    fun increment() = copy(point = point + direction.value)
+    fun next(direction: Direction) = Light(point + direction.value, direction)
 }
-
 
 fun main() {
 
-
-//    fun Contraption.print(energized: List<Light>, current: Light) {
-//        val points = energized.map { it.point }
-//        forEachIndexed { y, row ->
-//            row.mapIndexed { x, c ->
-//                if (current.point == Point(x, y)) "*" else if (points.contains(Point(x, y))) "#" else c
-//            }.joinToString("").println()
-//        }
-//        println("")
-//    }
-
-
-    fun Contraption.energized(start: Light, visited: MutableList<Light>) {
-        var light = start
-        while (inBounds(light.increment().point) && !visited.contains(light.increment())) {
-            light = light.increment()
-            visited.add(light)
-            val c = this[light.point]
-            if (c == '|' && light.direction.value.y == 0) {
-                energized(light.copy(direction = NORTH), visited)
-                energized(light.copy(direction = SOUTH), visited)
-                return
-            }
-            if (c == '-' && light.direction.value.x == 0) {
-                energized(light.copy(direction = EAST), visited)
-                energized(light.copy(direction = WEST), visited)
-                return
-            }
-            val direction = when (c) {
-                '/' -> when (light.direction) {
-                    NORTH -> EAST
-                    EAST -> NORTH
-                    SOUTH -> WEST
-                    WEST -> SOUTH
+    fun Contraption.energized(start: Light): Int {
+        val energised = mutableSetOf<Light>()
+        val queue = ArrayDeque(listOf(start))
+        while (queue.isNotEmpty()) {
+            val light = queue.removeFirst()
+            if (inBounds(light.point) && !energised.contains(light)) {
+                energised.add(light)
+                val c = this[light.point]
+                if (c == '|' && light.direction.value.y == 0) {
+                    queue.addAll(listOf(NORTH, SOUTH).map { light.next(it) })
+                } else if (c == '-' && light.direction.value.x == 0) {
+                    queue.addAll(listOf(EAST, WEST).map { light.next(it) })
+                } else if (c == '/') {
+                    val ordinal = light.direction.ordinal.let { (it / 2) * 2 + 1 - it % 2 }
+                    queue.add(light.next(Direction.entries[ordinal]))
+                } else if (c == '\\') {
+                    val ordinal = light.direction.ordinal.let { (1 - it / 2) * 2 + (1 - it % 2) }
+                    queue.add(light.next(Direction.entries[ordinal]))
+                } else {
+                    queue.add(light.next(light.direction))
                 }
-
-                '\\' -> when (light.direction) {
-                    NORTH -> WEST
-                    WEST -> NORTH
-                    SOUTH -> EAST
-                    EAST -> SOUTH
-                }
-
-                else -> light.direction
             }
-            light = light.copy(direction = direction)
         }
+        return energised.map { it.point }.toSet().size
     }
 
-    fun Contraption.countEnergized(start: Light): Int {
-        val visited = mutableListOf<Light>()
-        energized(start, visited)
-        val energized = visited.map { it.point }.toSet()
-        return energized.size
-    }
-
-    fun part1(contraption: Contraption): Int {
-        return contraption.countEnergized(Light(Point(-1, 0), EAST))
-    }
+    fun part1(contraption: Contraption) = contraption.energized(Light(Point(0, 0), EAST))
 
     fun part2(contraption: List<String>): Int {
-        val leftAndRight = contraption.indices.flatMap {
+        return (0..contraption.size).flatMap {
             listOf(
-                Light(Point(-1, it), EAST),
-                Light(Point(contraption[0].length, it), WEST)
+                Light(Point(0, it), EAST),
+                Light(Point(contraption[0].length - 1, it), WEST),
+                Light(Point(it, 0), SOUTH),
+                Light(Point(it, contraption.size - 1), NORTH),
             )
-        }
-        val topAndBottom = contraption[0].indices.flatMap {
-            listOf(
-                Light(Point(it, -1), SOUTH),
-                Light(Point(it, contraption.size), NORTH),
-            )
-        }
-        return (leftAndRight + topAndBottom).maxOf { contraption.countEnergized(it) }
+        }.maxOf { contraption.energized(it) }
     }
 
     val testInput = readInput("Day16_test")
-    check(part1(testInput).also { println(it) } == 46)
+    check(part1(testInput) == 46)
     check(part2(testInput) == 51)
 
     val input = readInput("Day16")
     measureTimedValue { part1(input) }.also { println("${it.value} in ${it.duration}") }
-    measureTimedValue { part2(input) }.also { check(it.value == 7521) }.also { println("${it.value} in ${it.duration}") }
+    measureTimedValue { part2(input) }.also { check(it.value == 7521) }
+        .also { println("${it.value} in ${it.duration}") }
 }
