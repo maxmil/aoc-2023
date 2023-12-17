@@ -1,31 +1,33 @@
 import kotlin.time.measureTimedValue
 
 
-data class Cell(val x: Int, val y: Int) {
-    operator fun plus(cell: Cell) = Cell(x + cell.x, y + cell.y)
-    operator fun minus(cell: Cell) = Cell(x - cell.x, y - cell.y)
-    fun isInverse(cell: Cell) = x + cell.x == 0 && y + cell.y == 0
-    fun inBounds(grid: Grid) = y < grid.size && y >= 0 && x < grid[y].length && x >= 0
-    fun turn(clockwise: Boolean): Cell {
-        val m = if (clockwise) 1 else -1
-        return when (this) {
-            Cell(0, -1) -> Cell(m * 1, 0)
-            Cell(1, 0) -> Cell(0, m * 1)
-            Cell(0, 1) -> Cell(m * -1, 0)
-            Cell(-1, 0) -> Cell(0, m * -1)
-            else -> throw IllegalArgumentException()
-        }
-    }
-    fun adjacent(grid: Grid): List<Cell> =
-        listOf(Cell(x, y - 1), Cell(x + 1, y), Cell(x, y + 1), Cell(x - 1, y))
-            .filter { inBounds(grid) }
-}
+
 
 typealias Grid = List<String>
 
-operator fun Grid.get(cell: Cell) = if (cell.inBounds(this)) this[cell.y][cell.x] else null
-
 fun main() {
+
+    data class Cell(val x: Int, val y: Int) {
+        operator fun plus(cell: Cell) = Cell(x + cell.x, y + cell.y)
+        operator fun minus(cell: Cell) = Cell(x - cell.x, y - cell.y)
+        fun isInverse(cell: Cell) = x + cell.x == 0 && y + cell.y == 0
+        fun inBounds(grid: Grid) = y < grid.size && y >= 0 && x < grid[y].length && x >= 0
+        fun turn(clockwise: Boolean): Cell {
+            val m = if (clockwise) 1 else -1
+            return when (this) {
+                Cell(0, -1) -> Cell(m * 1, 0)
+                Cell(1, 0) -> Cell(0, m * 1)
+                Cell(0, 1) -> Cell(m * -1, 0)
+                Cell(-1, 0) -> Cell(0, m * -1)
+                else -> throw IllegalArgumentException()
+            }
+        }
+        fun adjacent(grid: Grid): List<Cell> =
+            listOf(Cell(x, y - 1), Cell(x + 1, y), Cell(x, y + 1), Cell(x - 1, y))
+                .filter { inBounds(grid) }
+    }
+
+    operator fun Grid.get(cell: Cell) = if (cell.inBounds(this)) this[cell.y][cell.x] else null
 
     val pipes = mapOf(
         '|' to listOf(Cell(0, -1), Cell(0, 1)),
