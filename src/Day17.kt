@@ -1,5 +1,4 @@
 import java.util.*
-import kotlin.math.abs
 import kotlin.time.measureTimedValue
 
 fun main() {
@@ -7,38 +6,37 @@ fun main() {
 
     val start = Cell(0, 0)
     fun Grid.end() = Cell(this[0].length - 1, this.size - 1)
+    fun Cell.isTurn(line: List<Cell>) = line[0].x != x && line[0].y != y
 
-    fun Grid.minHeat(predicate: (List<Cell>, Cell) -> Boolean): Int {
-        val queue = PriorityQueue(compareBy<Path> { it.heat }).apply { add(Path(listOf(start), 0)) }
+    fun Grid.minHeat(predicate: Grid.(List<Cell>, Cell) -> Boolean): Int {
         val seen = mutableSetOf<List<Cell>>()
-        while (queue.isNotEmpty()) {
-            val path = queue.poll()
-            val cell = path.cells.last()
-            if (cell == this.end()) return path.heat
-            val line = path.cells.takeLastWhile { it.x == cell.x || it.y == cell.y }
+        val queue = PriorityQueue(compareBy<Path> { it.heat })
+        queue.add(Path(listOf(start), 0))
+        while (true) {
+            val (cells, heat) = queue.poll()
+            val cell = cells.last()
+            if (cell == end()) return heat
+            val line = cells.takeLastWhile { it.x == cell.x || it.y == cell.y }
             if (seen.contains(line)) continue
             seen.add(line)
             val lines = cell.adjacent().asSequence()
                 .filter { inBounds(it) }
-                .filter { path.cells.size < 2 || it != path.cells[path.cells.size - 2] }
-                .filter { !seen.contains(path.cells + listOf(it)) }
+                .filter { line.size < 2 || it != line[line.size - 2] }
+                .filter { !seen.contains(cells + it) }
                 .filter { predicate(line, it) }
-                .map { Path(path.cells + listOf(it), path.heat + this[it].digitToInt()) }
+                .map { Path(cells + it, heat + this[it].digitToInt()) }
             queue.addAll(lines)
         }
-        throw IllegalStateException()
     }
 
-    fun part1(grid: Grid): Int {
-        return grid.minHeat { cells, cell -> abs(cells[0].x - cell.x) < 4 && abs(cells[0].y - cell.y) < 4 }
-    }
+    fun part1(grid: Grid) = grid.minHeat { line, cell -> cell.isTurn(line) || line.size < 4 }
 
     fun part2(grid: Grid): Int {
-        return grid.minHeat { cells, cell ->
-            val isTurn = cells[0].x != cell.x && cells[0].y != cell.y
-            if (cell == grid.end()) !isTurn && cells.size > 3
-            else if (isTurn) cells.size > 4
-            else cells.size < 11
+        return grid.minHeat { line, cell ->
+            val isTurn = cell.isTurn(line)
+            if (cell == end()) !isTurn && line.size > 3
+            else if (isTurn) line.size > 4
+            else line.size < 11
         }
     }
 
