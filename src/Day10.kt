@@ -1,3 +1,4 @@
+import kotlin.math.abs
 import kotlin.time.measureTimedValue
 
 fun main() {
@@ -71,7 +72,7 @@ fun main() {
 
     fun part2(input: List<String>): Int {
         val start = input.indexOfFirst { it.indexOf('S') > -1 }.let { Cell(input[it].indexOf('S'), it) }
-        val moves = listOf(Cell(0, 1), Cell(1, 0), Cell(0, 1), Cell(-1, 0))
+        val moves = listOf(Cell(0, 1), Cell(1, 0), Cell(0, -1), Cell(-1, 0))
             .firstNotNullOf { moves(input, start, it) }
         val clockwise = isClockwiseLoop(moves)
         val inLoop = mutableSetOf<Cell>()
@@ -83,6 +84,20 @@ fun main() {
         return inLoop.size
     }
 
+    fun part2Elegant(input: List<String>): Int {
+        val start = input.indexOfFirst { it.indexOf('S') > -1 }.let { Cell(input[it].indexOf('S'), it) }
+        val moves = Cell(0, 0).adjacent().firstNotNullOf { moves(input, start, it) }
+
+        // Using the shoelace formula https://en.wikipedia.org/wiki/Shoelace_formula
+        val area = abs(moves.foldIndexed(0) { i, acc, cell ->
+            val next = moves[(i + 1) % moves.size]
+            acc + cell.x * next.y - cell.y * next.x
+        } / 2)
+
+        // Using Picks theorem https://en.wikipedia.org/wiki/Pick%27s_theorem
+        return area + 1 - moves.size / 2
+    }
+
     check(part1(readInput("Day10_test")) == 8)
     check(part2(readInput("Day10_part2_test_1")) == 4)
     check(part2(readInput("Day10_part2_test_2")) == 4)
@@ -92,4 +107,5 @@ fun main() {
     val input = readInput("Day10")
     measureTimedValue { part1(input) }.also { println("${it.value} in ${it.duration}") }
     measureTimedValue { part2(input) }.also { println("${it.value} in ${it.duration}") }
+    measureTimedValue { part2Elegant(input) }.also { println("${it.value} in ${it.duration}") }
 }
