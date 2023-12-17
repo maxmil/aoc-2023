@@ -5,6 +5,8 @@ fun main() {
 
     fun Cell.isInverse(cell: Cell) = x + cell.x == 0 && y + cell.y == 0
 
+    fun Grid.find(c: Char) = indexOfFirst { it.indexOf(c) > -1 }.let { Cell(this[it].indexOf(c), it) }
+
     val pipes = mapOf(
         '|' to listOf(Cell(0, -1), Cell(0, 1)),
         '-' to listOf(Cell(-1, 0), Cell(1, 0)),
@@ -29,15 +31,11 @@ fun main() {
     }
 
     fun part1(input: Grid): Int {
-        val start = input.indexOfFirst { it.indexOf('S') > -1 }.let { Cell(input[it].indexOf('S'), it) }
-        return listOf(Cell(0, 1), Cell(1, 0), Cell(0, 1), Cell(-1, 0))
-            .firstNotNullOf { moves(input, start, it) }
-            .size / 2
+        return Cell(0, 0).adjacent().firstNotNullOf { moves(input, input.find('S'), it) }.size / 2
     }
 
-    fun part2(input: List<String>): Int {
-        val start = input.indexOfFirst { it.indexOf('S') > -1 }.let { Cell(input[it].indexOf('S'), it) }
-        val moves = Cell(0, 0).adjacent().firstNotNullOf { moves(input, start, it) }
+    fun part2(input: Grid): Int {
+        val moves = Cell(0, 0).adjacent().firstNotNullOf { moves(input, input.find('S'), it) }
 
         // Using the shoelace formula https://en.wikipedia.org/wiki/Shoelace_formula
         val area = abs(moves.foldIndexed(0) { i, acc, cell ->
