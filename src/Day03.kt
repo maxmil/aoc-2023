@@ -2,7 +2,6 @@ import java.util.function.Predicate
 import kotlin.time.measureTimedValue
 
 fun main() {
-    data class Cell(val x: Int, val y: Int)
     data class Symbol(val pos: Cell, val value: Char)
     data class Part(val pos: Cell, val value: Int) {
         fun adjacentTo(cell: Cell) = cell.x >= pos.x - 1 &&
