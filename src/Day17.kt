@@ -1,5 +1,4 @@
 import java.util.*
-import kotlin.math.min
 import kotlin.time.measureTimedValue
 
 fun main() {
@@ -11,31 +10,23 @@ fun main() {
 
     fun Grid.minHeat(predicate: Grid.(List<Cell>, Cell) -> Boolean): Int {
         val seen = mutableSetOf<List<Cell>>()
-        val queue = PriorityQueue(compareBy<Path> { it.heat + manhattan(it.cells.last(), end()) })
-        var minimum = Int.MAX_VALUE
+        val queue = PriorityQueue(compareBy<Path> { it.heat })
         queue.add(Path(listOf(start), 0))
-        while (queue.isNotEmpty()) {
+        while (true) {
             val (cells, heat) = queue.poll()
             val cell = cells.last()
-            if ((heat + manhattan(cell, end())) > minimum) continue
-            if (cell == end()) {
-                minimum = min(minimum, heat)
-                continue
-            }
+            if (cell == end()) return heat
             val line = cells.takeLastWhile { it.x == cell.x || it.y == cell.y }
             if (seen.contains(line)) continue
             seen.add(line)
             val lines = cell.adjacent().asSequence()
                 .filter { inBounds(it) }
-                .filter { heat + this[it].digitToInt() + manhattan(it, end()) < minimum}
                 .filter { line.size < 2 || it != line[line.size - 2] }
                 .filter { !seen.contains(cells + it) }
                 .filter { predicate(line, it) }
                 .map { Path(cells + it, heat + this[it].digitToInt()) }
-
             queue.addAll(lines)
         }
-        return minimum
     }
 
     fun part1(grid: Grid) = grid.minHeat { line, cell -> cell.isTurn(line) || line.size < 4 }
