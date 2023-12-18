@@ -1,6 +1,7 @@
 data class Cell(val x: Int, val y: Int) {
     operator fun plus(cell: Cell) = Cell(x + cell.x, y + cell.y)
     operator fun minus(cell: Cell) = Cell(x - cell.x, y - cell.y)
+    operator fun times(i: Int) = Cell(x * i, y * i)
     fun adjacent() = listOf(-1, 1).flatMap { listOf(Cell(x, y + it), Cell(x + it, y)) }
 }
 
@@ -17,4 +18,3 @@ enum class Direction(val value: Point) {
     SOUTH(Point(0, 1)),
     WEST(Point(-1, 0)),
 }
-
