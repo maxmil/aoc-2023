@@ -10,6 +10,7 @@ typealias Grid = List<String>
 
 fun Grid.inBounds(cell: Cell) = cell.y in indices && cell.x in this[0].indices
 operator fun Grid.get(cell: Cell) = this[cell.y][cell.x]
+fun Grid.manhattan(from:Cell, to:Cell) = (to - from).let { (x, y) -> x + y }
 enum class Direction(val value: Point) {
     NORTH(Point(0, -1)),
     EAST(Point(1, 0)),
