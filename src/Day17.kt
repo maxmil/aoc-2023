@@ -2,30 +2,27 @@ import java.util.*
 import kotlin.time.measureTimedValue
 
 fun main() {
-    data class Path(val cells: List<Cell>, val heat: Int)
+    data class LineHeat(val cells: List<Cell>, val heat: Int)
 
-    val start = Cell(0, 0)
     fun Grid.end() = Cell(this[0].length - 1, this.size - 1)
     fun Cell.isTurn(line: List<Cell>) = line[0].x != x && line[0].y != y
 
     fun Grid.minHeat(predicate: Grid.(List<Cell>, Cell) -> Boolean): Int {
         val seen = mutableSetOf<List<Cell>>()
-        val queue = PriorityQueue(compareBy<Path> { it.heat })
-        queue.add(Path(listOf(start), 0))
+        val queue = PriorityQueue(compareBy<LineHeat> { it.heat })
+        queue.add(LineHeat(listOf(Cell(0, 0)), 0))
         while (true) {
-            val (cells, heat) = queue.poll()
-            val cell = cells.last()
-            if (cell == end()) return heat
-            val line = cells.takeLastWhile { it.x == cell.x || it.y == cell.y }
+            val (line, heat) = queue.poll()
+            if (line.last() == end()) return heat
             if (seen.contains(line)) continue
             seen.add(line)
-            val lines = cell.adjacent().asSequence()
+            line.last().adjacent().asSequence()
                 .filter { inBounds(it) }
                 .filter { line.size < 2 || it != line[line.size - 2] }
-                .filter { !seen.contains(cells + it) }
                 .filter { predicate(line, it) }
-                .map { Path(cells + it, heat + this[it].digitToInt()) }
-            queue.addAll(lines)
+                .map { next -> (line + next).takeLastWhile { it.x == next.x || it.y == next.y } }
+                .map { LineHeat(it, heat + this[it.last()].digitToInt()) }
+                .let { queue.addAll(it) }
         }
     }
 
